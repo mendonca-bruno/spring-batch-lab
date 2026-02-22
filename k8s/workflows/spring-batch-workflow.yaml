@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: spring-batch-job-
+  namespace: argo
+spec:
+  entrypoint: executar-job
+  templates:
+    - name: executar-job
+      container:
+        image: mendoncabruno/spring-batch-lab:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

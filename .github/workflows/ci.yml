@@ -7,17 +7,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
-
-      - name: Configurar Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
 
       - name: Build com Maven
         run: mvn clean package -DskipTests
@@ -34,3 +28,7 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:latest
+
+      - name: Deploy workflow no Argo
+        run: |
+          kubectl create -n argo -f k8s/workflows/spring-batch-workflow.yaml
