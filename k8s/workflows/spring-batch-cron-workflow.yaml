@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: spring-batch-scheduled
+  namespace: argo
+spec:
+  schedule: "*/15 * * * *"
+  timezone: "America/Sao_Paulo"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    entrypoint: executar-job
+    templates:
+      - name: executar-job
+        container:
+          image: mendoncabruno/spring-batch-lab:IMAGE_TAG
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

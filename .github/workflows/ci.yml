@@ -78,7 +78,3 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:${{ steps.version.outputs.tag }}
             ${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:latest
 
-      - name: Patch e Deploy workflow no Argo
-        run: |
-          sed 's|IMAGE_TAG|${{ steps.version.outputs.tag }}|g' k8s/workflows/spring-batch-workflow.yaml \
-            | kubectl create -n argo -f -
