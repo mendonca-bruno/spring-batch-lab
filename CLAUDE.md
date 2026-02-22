@@ -48,4 +48,4 @@ The H2 schema is auto-created by Spring Batch on startup to store job execution 
 
 The entry point is `SpringBatchLabApplication.java`. Configuration for jobs and steps should be added as `@Configuration` classes under `com.mendonca.spring_batch_lab`.
 
-There is no linting or code formatting tool configured in this project
+There is no linting or code formatting tool configured in this project.

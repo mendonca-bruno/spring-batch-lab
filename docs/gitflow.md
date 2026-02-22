@@ -63,50 +63,46 @@ git push origin --delete feature/nome-da-feature
 
 ## 3. Release — Preparando uma versão para produção
 
-A branch `release/*` congela o escopo, aplica ajustes finos (versão, changelog) e gera a tag que dispara o pipeline de CI/CD.
+A branch `release/*` congela o escopo, **atualiza a versão no `pom.xml`** e é mergeada em `main` via PR.
+O pipeline detecta o merge, lê a versão do `pom.xml`, cria a tag Git automaticamente e executa o build/push/deploy.
+
+> **Contrato:** a versão no `pom.xml` deve estar atualizada antes do merge em `main`.
+> Se a tag `vX.Y.Z` já existir, o pipeline falha com uma mensagem de erro clara.
 
 ```bash
 # 1. Garanta que develop está atualizado
 git checkout develop
 git pull origin develop
 
-# 2. Crie a branch de release (use o número da versão sem o "v")
+# 2. Crie a branch de release
 git checkout -b release/1.0.0
 
-# 3. Atualize a versão no pom.xml (o CI também fará isso, mas é boa prática manter no repo)
-# Edite manualmente ou use:
+# 3. Atualize a versão no pom.xml — este é o único passo obrigatório
 mvn versions:set -DnewVersion=1.0.0 -DgenerateBackupPoms=false
 git add pom.xml
 git commit -m "chore: bump version to 1.0.0"
 
-# 4. Faça ajustes finais (bugfixes menores, changelog, etc.)
-git add .
-git commit -m "chore: prepare release 1.0.0"
+# 4. Faça ajustes finais se necessário (bugfixes menores, changelog, etc.)
+# git add . && git commit -m "chore: prepare release 1.0.0"
 
 # 5. Envie para o remoto e abra PR: release/1.0.0 → main
 git push -u origin release/1.0.0
 
 # --- Após aprovação e merge do PR em main ---
+# O pipeline CI/CD dispara automaticamente, lê "1.0.0" do pom.xml,
+# cria a tag v1.0.0, constrói o JAR, faz push das imagens Docker
+# e aplica o workflow no Argo.
 
-# 6. Crie a tag de versão no commit de merge em main
-git checkout main
-git pull origin main
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
-# O push da tag dispara o pipeline de CI/CD automaticamente
-
-# 7. Integre as mudanças de volta ao develop
+# 6. Integre as mudanças de volta ao develop
 git checkout develop
+git pull origin develop
 git merge --no-ff release/1.0.0
 git push origin develop
 
-# 8. Delete a branch de release
+# 7. Delete a branch de release
 git branch -d release/1.0.0
 git push origin --delete release/1.0.0
 ```
-
-> **O pipeline de CI/CD é disparado exclusivamente pelo push da tag `v*.*.*`.**
-> Ele extrai a versão, atualiza o pom.xml, constrói o JAR, faz push das imagens Docker e aplica o workflow no Argo.
 
 ---
 
@@ -131,12 +127,8 @@ git push -u origin hotfix/1.0.1
 
 # --- Após aprovação e merge do PR em main ---
 
-# 5. Crie a tag de versão
-git checkout main
-git pull origin main
-git tag -a v1.0.1 -m "Hotfix v1.0.1"
-git push origin v1.0.1
-# O push da tag dispara o pipeline de CI/CD
+# 5. Após merge do PR em main, o pipeline CI/CD dispara automaticamente
+# e cria a tag v1.0.1 a partir da versão no pom.xml
 
 # 6. Integre a correção ao develop
 git checkout develop
