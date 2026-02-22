@@ -15,7 +15,8 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Aplicar CronWorkflow no Argo
+      - name: Atualizar imagem no CronWorkflow do Argo
         run: |
-          sed 's|IMAGE_TAG|${{ github.event.inputs.tag }}|g' k8s/workflows/spring-batch-cron-workflow.yaml \
-            | kubectl apply -n argo -f -
+          kubectl patch cronworkflow spring-batch-scheduled -n argo \
+            --type='json' \
+            -p='[{"op": "replace", "path": "/spec/workflowSpec/templates/0/container/image", "value": "${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:${{ github.event.inputs.tag }}"}]'
