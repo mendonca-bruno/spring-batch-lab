@@ -1,0 +1,21 @@
+name: CD - Deploy no Argo
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag para deploy (ex: v1.2.0)'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Aplicar CronWorkflow no Argo
+        run: |
+          sed 's|IMAGE_TAG|${{ github.event.inputs.tag }}|g' k8s/workflows/spring-batch-cron-workflow.yaml \
+            | kubectl apply -n argo -f -
