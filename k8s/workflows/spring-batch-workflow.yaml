@@ -8,7 +8,7 @@ spec:
   templates:
     - name: executar-job
       container:
-        image: mendoncabruno/spring-batch-lab:latest
+        image: mendoncabruno/spring-batch-lab:IMAGE_TAG
         imagePullPolicy: Always
         resources:
           requests:

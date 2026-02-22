@@ -2,8 +2,8 @@ name: CI - Build and Push
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -13,6 +13,18 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Extrair versão da tag
+        id: version
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Atualizar versão no pom.xml
+        run: |
+          mvn versions:set -DnewVersion=${{ steps.version.outputs.version }} -DgenerateBackupPoms=false
+
       - name: Build com Maven
         run: mvn clean package -DskipTests
 
@@ -21,7 +33,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -30,8 +42,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:${{ steps.version.outputs.tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:latest
 
-      - name: Deploy workflow no Argo
+      - name: Patch e Deploy workflow no Argo
         run: |
-          kubectl create -n argo -f k8s/workflows/spring-batch-workflow.yaml
+          sed 's|IMAGE_TAG|${{ steps.version.outputs.tag }}|g' k8s/workflows/spring-batch-workflow.yaml \
+            | kubectl create -n argo -f -
