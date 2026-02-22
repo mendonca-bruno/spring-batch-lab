@@ -26,6 +26,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
+      - name: Validar versão de release
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          if [[ "$VERSION" == *"-SNAPSHOT"* ]]; then
+            echo "::error::Versão SNAPSHOT ($VERSION) não pode ser mergeada em main. Use uma versão de release (ex: 1.0.0)."
+            exit 1
+          fi
+
       - name: Verificar se a tag já existe
         run: |
           TAG=${{ steps.version.outputs.tag }}
