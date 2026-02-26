@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.mendonca</groupId>
 	<artifactId>spring-batch-lab</artifactId>
-	<version>1.4.0</version>
+	<version>1.5.0</version>
 	<name>spring-batch-lab</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
