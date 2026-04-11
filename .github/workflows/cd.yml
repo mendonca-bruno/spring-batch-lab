@@ -17,6 +17,6 @@ jobs:
 
       - name: Atualizar imagem no CronWorkflow do Argo
         run: |
-          kubectl patch cronworkflow spring-batch-scheduled -n argo \
+          kubectl --context=k3s-remote patch cronworkflow spring-batch-scheduled -n argo \
             --type='json' \
             -p='[{"op": "replace", "path": "/spec/workflowSpec/templates/0/container/image", "value": "${{ secrets.DOCKERHUB_USERNAME }}/spring-batch-lab:${{ github.event.inputs.tag }}"}]'
